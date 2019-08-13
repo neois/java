@@ -1,6 +1,5 @@
-Java/Spring
 slf4j & logback 설정
-털 업 2019.01.09 13:23
+
 MAVEN
 아래와 같습니다. 
 <dependency>
@@ -61,9 +60,6 @@ spring에서 프로젝트 생성하면 기본으로 생성되는 log4j.xml은 �
 설정이 잘 되었다면 아래와 같이 로그가 찍힙니다. 
 
 
-
-
-
 SEND LOG TO FILE
 로그를 파일로 저장하기 위해서 appender를 추가해 줍니다. 
 
@@ -83,8 +79,6 @@ SEND LOG TO FILE
         <maxHistory>15</maxHistory>
     </rollingPolicy>
 </appender>
-Colored by Color Scripter
-cs
 
 
 root 에 appender 추가해주시면 됩니다. 
@@ -126,9 +120,6 @@ cs
 
 
 DEBUG 레벨로 설정시 아래와 같은 로그가 찍혔습니다.
-
-
-
 
 
 TRACE 레벨로 설정하면 Columns와 Row 가 추가로 찍힙니다. 
