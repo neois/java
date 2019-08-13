@@ -1,0 +1,135 @@
+Java/Spring
+slf4j & logback 설정
+털 업 2019.01.09 13:23
+MAVEN
+아래와 같습니다. 
+<dependency>
+    <groupId>org.springframework</groupId>
+    <artifactId>spring-context</artifactId>
+    <version>${org.springframework-version}</version>
+    <exclusions>
+        <!-- Exclude Commons Logging in favor of SLF4j -->
+        <exclusion>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+ 
+... 
+ 
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>jcl-over-slf4j</artifactId>
+    <version>1.7.7</version>
+</dependency>
+ 
+<dependency>
+    <groupId>ch.qos.logback</groupId>
+    <artifactId>logback-classic</artifactId>
+    <version>1.2.3</version>
+</dependency>
+Colored by Color Scripter
+cs
+SEND LOG TO CONSOLE
+콘솔에 로그를 찍기 위해 src/main/resources 폴더 아래 logback.xml 파일을 만들고 다음과 같이 작성합니다.
+
+(패턴 참고)
+
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Console Log Setting -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <encoder>
+                <pattern>[%d{yyyy/MM/dd HH:mm:ss}] %highlight(%-5level)| %cyan(%-25.25logger{0}) | %msg%n</pattern>
+            </encoder>
+        </layout>
+    </appender>
+ 
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+ 
+</configuration>
+Colored by Color Scripter
+cs
+
+
+spring에서 프로젝트 생성하면 기본으로 생성되는 log4j.xml은 삭제해도 됩니다. 
+
+설정이 잘 되었다면 아래와 같이 로그가 찍힙니다. 
+
+
+
+
+
+SEND LOG TO FILE
+로그를 파일로 저장하기 위해서 appender를 추가해 줍니다. 
+
+경로 / maxFileSize / maxHistory 등은 변경하시구요 
+
+<appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>E:/logs/debug.log</file>
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+        <pattern>[%-5level] %d{HH:mm:ss.SSS} %logger{36} - %msg%n</pattern>
+    </encoder>
+    
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        <fileNamePattern>E:/logs/old/debug.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+        <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+            <maxFileSize>50MB</maxFileSize>
+        </timeBasedFileNamingAndTriggeringPolicy>
+        <maxHistory>15</maxHistory>
+    </rollingPolicy>
+</appender>
+Colored by Color Scripter
+cs
+
+
+root 에 appender 추가해주시면 됩니다. 
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="file" />
+    </root>
+cs
+
+
+ERROR 로그 분리
+file로 빼는 appender를 하나 더 만드세요. (위의 것과 비슷한)
+경로와 이름을 바꾸신 뒤 appender를 아래와 같이 등록해 줍니다. 
+에러 level에 해당하는 로그만 분리되어 저장될 것입니다. 
+    <!-- 콘솔 & 파일에 로그 전달-->
+    <logger name="com.example" level="debug" additivity="false">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="file" />
+    </logger>
+ 
+    <root level="error">
+        <appender-ref ref="file-error" />
+    </root>
+Colored by Color Scripter
+cs
+
+
+SQL LOGGING
+(전 단계의 logger에서 com.example과 같이 이미 포함시켰다면 이 단계는 스킵)
+
+SQL 로그를 찍기 위해 logger를 하나 추가합니다. 
+mybatis의 mapper가 들어있는 패키지를 name 안에 넣어 줍니다. 
+<!-- 모든 mapper가 같은 패키지 안에 존재할 때 -->
+<logger name="com.example.myweb.mapper" level="DEBUG"/>
+<!-- mapper가 흩어져 있을 때 -->
+<logger name="com.example.myweb.mapper.MyMapper" level="DEBUG"/>
+cs
+
+
+DEBUG 레벨로 설정시 아래와 같은 로그가 찍혔습니다.
+
+
+
+
+
+TRACE 레벨로 설정하면 Columns와 Row 가 추가로 찍힙니다. 
+
