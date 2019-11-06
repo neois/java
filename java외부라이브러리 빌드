@@ -1,6 +1,6 @@
 ﻿ java 외부라이브러리 빌드
    
-이클립스에서 외부 라이브러리를 Class Folder로 추가해서 빌드하면 따로 외부라이브러리로
+﻿이클립스에서 외부 라이브러리를 Class Folder로 추가해서 빌드하면 따로 외부라이브러리로
 
 추가 할 필요는 없다.
 
@@ -10,6 +10,17 @@
 
 - launch configuration : 빌드 할 프로젝트 선택
 
-- library handling : Extract requried .. 선택
+- library handling : Extract requried ..(파일이 커짐), Copy requaried 선택
 
 빌드되면 한 개 jar에 모두 포함되어 따로 라이브러리 패스를 표시할 필요 없음
+
+이클립스 확장 라이브러리 Fat jar 를 이용하면 필요한 라이브러리만 추가되어 크기가 줄어든다. 
+
+
+.clsss 로 빌드된 파일, 라이브러리 패스와 함께 실행하기
+
+여러 라이브러리는 ; 로 연결(windows ; linux : )
+
+java -classpath .;ExtUtils-1.0.jar lotte.BizMiClientNew (class)
+
+﻿
