@@ -1,0 +1,42 @@
+Java에서 .NET 유형의 데이터 세트 사용
+
+protected List<Object> any;
+ 
+public List<Object> getAny() {
+            if (any == null) {
+                any = new ArrayList<Object>();
+            }
+            return this.any;
+    }
+    
+
+웹 서비스에서 직접 arraylist를 반환 할 수 없습니다. ArrayList는 Java의 개념이기 때문입니다. 
+arraylist에 대해 별도의 POJO 클래스를 작성해야합니다.
+
+POJO 클래스 :-
+
+public class ResponseDataArrayList {
+    ArrayList list;
+    public ArrayList getList() {
+        return list;
+    }
+
+    public void setList(ArrayList list) {
+        this.list = list;
+    }   
+}
+이제 구현 메소드에서 약간의 변경이 필요합니다 .Setter 메소드를 사용하여 배열 목록을 설정하십시오. 
+또한 메소드의 리턴 유형을 POJO 클래스 유형으로 변경하십시오.이 단계는 가장 중요합니다.
+
+public ResponseDataArrayList getProdList(){
+
+        ArrayList al=new ArrayList();           
+        al.add("Meeting at 12");
+       al.add("School at 10am on 6");
+       al.add("Holiday on 8th");
+
+        ResponseDataArrayList objwrapper=new ResponseDataArrayList();
+        objwrapper.setList(al);
+
+        return objwrapper;
+    }
