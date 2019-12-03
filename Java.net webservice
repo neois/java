@@ -1,0 +1,130 @@
+Java는 .net webService에서 리턴 한 DataSet 오브젝트를 처리합니다.
+전반적인 과정은 다음과 같습니다.
+
+1. .Net WebService가 전달한 DataSet 개체를 가져옵니다.
+
+2. 스키마를 사용하여 DataSet 객체를받습니다.
+
+3.이 스키마 객체를 xml 파일에 기록
+
+4, XML 파일을 구문 분석하고 구문 분석 된 데이터를 Java의 엔티티로 캡슐화합니다.
+
+package webSerivce;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.rmi.RemoteException;  
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+ 
+import javax.xml.namespace.QName;  
+import javax.xml.rpc.ParameterMode;  
+import javax.xml.rpc.ServiceException;  
+import javax.xml.soap.SOAPException;  
+ 
+import org.apache.axis.client.Call;  
+import org.apache.axis.client.Service;
+import org.apache.axis.message.MessageElement;
+import org.apache.axis.message.SOAPHeaderElement;
+import org.apache.axis.types.Schema;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
+
+import com.entity.CardInfo;
+
+/**
+ * 测试GetHotelInfoList
+ */
+public class GetCardInfoTest2 {
+ 
+ private String endpoint = "http://113.57.135.78/DataEngine/wsDataEngineForWebsite.asmx?wsdl";
+    
+ public CardInfo getCardInfo() throws MalformedURLException,
+     ServiceException, RemoteException{
+  
+        Service service = new Service();
+        Call call = (Call) service.createCall();
+        call.setTargetEndpointAddress(new java.net.URL(endpoint));
+        call.setUseSOAPAction(true);
+        call.setSOAPActionURI("http://tempuri.org/GetCardInfo");
+        call.setOperationName(new QName("http://tempuri.org/","GetCardInfo"));
+        call.addParameter(new QName("http://tempuri.org/","CardNo"),                 org.apache.axis.encoding.XMLType.XSD_STRING,ParameterMode.IN);
+        call.addParameter(new QName("http://tempuri.org/","Password"), org.apache.axis.encoding.XMLType.XSD_STRING,ParameterMode.IN);
+        call.setReturnType(org.apache.axis.encoding.XMLType.XSD_SCHEMA);//在这里设置webService返回的数据类型
+        SOAPHeaderElement soapHeaderElement = new SOAPHeaderElement("http://tempuri.org/", "WSAuthHeader");  
+        soapHeaderElement.setNamespaceURI("http://tempuri.org/");
+       
+        try{  
+            soapHeaderElement.addChildElement("UserName").setValue("admin");
+            soapHeaderElement.addChildElement("Password").setValue("123");
+            call.addHeader(soapHeaderElement);
+        } catch (SOAPException e) {  
+            e.printStackTrace();  
+        }
+       
+        call.addHeader(soapHeaderElement); 
+        Object res = (Object) call.invoke(new String[]{"1234","1234"});
+        Schema schema = (Schema)res;
+        MessageElement[] msgele = schema.get_any();
+        List FOCElementHead = msgele[0].getChildren();//消息头,DataSet对象
+        List FOCElementBody = msgele[1].getChildren();//消息体信息,DataSet对象
+       
+        if (FOCElementBody.size() <= 0){
+         System.out.println("无消息体");
+        }
+       
+        String nn = FOCElementBody.get(0).toString();//消息体的字符串形式
+        try {
+            this.saveXMLString(nn,"c://test.xml");//保存为XML形式
+            this.parserXml("c://test.xml");
+        } catch (IOException e) {
+            e.printStackTrace();
+  }
+  return null;
+ }
+ 
+ /**
+  * 把读出来的xml数据写成文件，以便下一步解析的时候用
+  */
+ private void saveXMLString(String XMLString, String fileName)throws IOException {   
+        File file = new File(fileName);   
+        if (file.exists()) {   
+            file.delete();   
+        }   
+        file.createNewFile();   
+        if (file.canWrite()) {   
+            FileWriter fileOut = new FileWriter(file);   
+            fileOut.write(XMLString);   
+            fileOut.close();   
+        }   
+ }
+ 
+ /**
+  * 解析xml文件
+  */
+ private void parserXml(String fileName) throws MalformedURLException {
+  CardInfo cardInfo = new CardInfo();
+  File inputXml = new File(fileName);
+  SAXReader saxReader = new SAXReader();
+  try {
+   Document document = saxReader.read(inputXml);
+   Element node1 = document.getRootElement();
+   List<String> param = new ArrayList<String>();
+   
+
+   //遍历xml文件
+   for (Iterator i = node1.elementIterator(); i.hasNext();) {
+    Element node2 = (Element) i.next();
+    
+    Iterator node =  node2.elementIterator("no");
+    Element ele = (Element) node.next();
+    
+    for (Iterator j = node2.elementIterator(); j.hasNext();) {
+     Element node3 = (Element) j.next();
+
+     System.out.println(node3.getName() + ":" + node3.getText());            param.add(node3.getText());//把元素装入一个数组           }    }        //在这里   将param数组里的元素封装到entity里       } catch (DocumentException e) {    System.out.println(e.getMessage());   }  }     public static void main(String[] args){   GetCardInfoTest2 test = new GetCardInfoTest2();   try {    test.getCardInfo();   } catch (MalformedURLException e) {    e.printStackTrace();   } catch (RemoteException e) {    e.printStackTrace();   } catch (ServiceException e) {    e.printStackTrace();   }  }   }
